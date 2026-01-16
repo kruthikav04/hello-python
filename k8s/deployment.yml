@@ -15,7 +15,7 @@ spec:
       containers:
       - name: python
         image: hello-python:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Never
         ports:
         - containerPort: 6001
 ---
@@ -30,4 +30,5 @@ spec:
   ports:
   - port: 6001
     targetPort: 6001
+    nodePort: 30001
 
