@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        KUBECONFIG = '/var/jenkins_home/.kube/config'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -16,15 +20,14 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t hello-python .'
+                sh 'docker build -t hello-python:latest .'
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f deployment.yaml'
+                sh 'kubectl apply -f deployment.yaml -n dev'
             }
         }
     }
 }
-
