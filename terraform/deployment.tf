@@ -1,0 +1,41 @@
+resource "kubernetes_deployment_v1" "python_app" {
+  metadata {
+    name      = "python-app"
+    namespace = kubernetes_namespace_v1.dev.metadata[0].name
+    labels = {
+      app = "python"
+    }
+  }
+
+  spec {
+    replicas = 2
+
+    selector {
+      match_labels = {
+        app = "python"
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          app = "python"
+        }
+      }
+
+      spec {
+        container {
+          name  = "python"
+          image = "hello-python:latest"
+
+          image_pull_policy = "Never"
+
+          port {
+            container_port = 6001
+          }
+        }
+      }
+    }
+  }
+}
+
