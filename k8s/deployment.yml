@@ -33,9 +33,4 @@ spec:
   ports:
   - port: 6001
     targetPort: 6001
-<<<<<<< HEAD
-    nodeport: 30001
-
-=======
-    nodePort: 31708  # ensure this port is free
->>>>>>> 8bd25c7b693fdbf61bcbbb971b7f07fa91a48cf5
+    nodePort: 31708  
