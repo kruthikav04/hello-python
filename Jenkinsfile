@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        // You can set global environment variables here if needed
+    }
+
     stages {
 
         stage('Checkout') {
@@ -15,20 +19,14 @@ pipeline {
                 echo 'Running SonarQube Scan'
                 withCredentials([string(credentialsId: 'Sonar-token', variable: 'SONAR_TOKEN')]) {
                     sh '''
-                        # Install sonar-scanner if not installed
-                        if ! command -v sonar-scanner &> /dev/null
-                        then
-                            echo "Installing sonar-scanner..."
-                            wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.9.0.43723-linux.zip
-                            unzip sonar-scanner-cli-4.9.0.43723-linux.zip
-                            export PATH=$PWD/sonar-scanner-4.9.0.43723-linux/bin:$PATH
-                        fi
-
-                        sonar-scanner \
-                          -Dsonar.projectKey=hello-python \
-                          -Dsonar.projectName=hello-python \
-                          -Dsonar.sources=. \
-                          -Dsonar.login=$SONAR_TOKEN
+                        # Run Sonar scanner using Docker
+                        docker run --rm \
+                            -v $(pwd):/usr/src \
+                            sonarsource/sonar-scanner-cli:latest \
+                            -Dsonar.projectKey=hello-python \
+                            -Dsonar.projectName=hello-python \
+                            -Dsonar.sources=. \
+                            -Dsonar.login=$SONAR_TOKEN
                     '''
                 }
             }
@@ -44,17 +42,12 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 echo 'Deploying to Kubernetes'
-                withCredentials([file(credentialsId: 'kubeconfig-dev', variable: 'KUBECONFIG_FILE')]) {
+                withCredentials([file(credentialsId: 'kubeconfig-dev', variable: 'KUBECONFIG')]) {
                     sh '''
-                        mkdir -p .kube
-                        cp $KUBECONFIG_FILE .kube/config
-                        
-                        docker run --rm \
-                          -v $(pwd)/.kube/config:/.kube/config \
-                          -v $(pwd):/workspace \
-                          -w /workspace \
-                          bitnami/kubectl:latest \
-                          kubectl apply -f deployment.yaml -n dev
+                        # Ensure KUBECONFIG environment variable is set
+                        export KUBECONFIG=$KUBECONFIG
+                        # Apply Kubernetes deployment
+                        kubectl apply -f deployment.yaml -n dev
                     '''
                 }
             }
