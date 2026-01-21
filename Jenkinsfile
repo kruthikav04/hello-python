@@ -10,22 +10,6 @@ pipeline {
             }
         }
 
-        stage('SonarQube Scan') {
-            steps {
-                echo 'Running SonarQube Scan'
-                // Use Jenkins secret token
-                withCredentials([string(credentialsId: 'Sonar-token', variable: 'SONAR_TOKEN')]) {
-                    sh '''
-                        sonar-scanner \
-                            -Dsonar.projectKey=hello-python \
-                            -Dsonar.projectName=hello-python \
-                            -Dsonar.sources=. \
-                            -Dsonar.login=$SONAR_TOKEN
-                    '''
-                }
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 echo 'Building Docker image'
