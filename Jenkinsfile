@@ -1,11 +1,9 @@
 pipeline {
     agent any
 
+    // Environment variables
     environment {
-        # SonarQube reachable IP
         SONAR_HOST_URL = "http://10.4.4.69:9000"
-
-        # Kubernetes config path
         KUBECONFIG = '/var/jenkins_home/.kube/config'
     }
 
