@@ -12,7 +12,7 @@ resource "kubernetes_service_v1" "python_service" {
       target_port = 6001
       node_port   = 30007
     }
-    type = "LoadBalancer"
+    type = "NodePort"   # <- change this from LoadBalancer
   }
 }
 

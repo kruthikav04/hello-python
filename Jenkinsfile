@@ -19,16 +19,18 @@ pipeline {
                 echo 'Running SonarQube Scan'
 
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    docker.image('sonarsource/sonar-scanner-cli:latest').inside {
-                        sh '''
-                          sonar-scanner \
-                            -Dsonar.projectKey=hello-python \
-                            -Dsonar.projectName=hello-python \
-                            -Dsonar.sources=. \
-                            -Dsonar.language=py \
-                            -Dsonar.host.url=$SONAR_HOST_URL \
-                            -Dsonar.login=$SONAR_TOKEN
-                        '''
+                    script {
+                        docker.image('sonarsource/sonar-scanner-cli:latest').inside {
+                            sh '''
+                              sonar-scanner \
+                                -Dsonar.projectKey=hello-python \
+                                -Dsonar.projectName=hello-python \
+                                -Dsonar.sources=. \
+                                -Dsonar.language=py \
+                                -Dsonar.host.url=$SONAR_HOST_URL \
+                                -Dsonar.login=$SONAR_TOKEN
+                            '''
+                        }
                     }
                 }
             }
@@ -42,8 +44,10 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                docker.image('bitnami/kubectl:latest').inside {
-                    sh 'kubectl apply -f deployment.yaml -n dev'
+                script {
+                    docker.image('bitnami/kubectl:latest').inside {
+                        sh 'kubectl apply -f deployment.yaml -n dev'
+                    }
                 }
             }
         }
