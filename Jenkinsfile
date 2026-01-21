@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        // You can set global environment variables here if needed
-    }
-
     stages {
 
         stage('Checkout') {
@@ -19,10 +15,16 @@ pipeline {
                 echo 'Running SonarQube Scan'
                 withCredentials([string(credentialsId: 'Sonar-token', variable: 'SONAR_TOKEN')]) {
                     sh '''
-                        # Run Sonar scanner using Docker
-                        docker run --rm \
-                            -v $(pwd):/usr/src \
-                            sonarsource/sonar-scanner-cli:latest \
+                        # Install sonar-scanner if not installed
+                        if ! command -v sonar-scanner &> /dev/null
+                        then
+                            echo "Installing sonar-scanner..."
+                            wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.9.0.43723-linux.zip
+                            unzip sonar-scanner-cli-4.9.0.43723-linux.zip
+                            export PATH=$PWD/sonar-scanner-4.9.0.43723-linux/bin:$PATH
+                        fi
+
+                        sonar-scanner \
                             -Dsonar.projectKey=hello-python \
                             -Dsonar.projectName=hello-python \
                             -Dsonar.sources=. \
@@ -44,10 +46,7 @@ pipeline {
                 echo 'Deploying to Kubernetes'
                 withCredentials([file(credentialsId: 'kubeconfig-dev', variable: 'KUBECONFIG')]) {
                     sh '''
-                        # Ensure KUBECONFIG environment variable is set
-                        export KUBECONFIG=$KUBECONFIG
-                        # Apply Kubernetes deployment
-                        kubectl apply -f deployment.yaml -n dev
+                        kubectl --kubeconfig=$KUBECONFIG apply -f deployment.yaml -n dev
                     '''
                 }
             }
