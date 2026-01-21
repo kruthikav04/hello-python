@@ -31,6 +31,8 @@ spec:
   selector:
     app: python
   ports:
-  - port: 6001
-    targetPort: 6001
-    nodePort: 31708  
+    - name: http  # <-- REQUIRED
+      port: 6001
+      targetPort: 6001
+      nodePort: 31708
+
