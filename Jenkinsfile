@@ -12,19 +12,14 @@ pipeline {
 
         stage('Code Quality - SonarQube') {
             steps {
-                echo 'Running SonarQube Scan'
+                echo 'Running SonarQube Scan using Docker'
                 withCredentials([string(credentialsId: 'Sonar-token', variable: 'SONAR_TOKEN')]) {
                     sh '''
-                        # Install sonar-scanner if not installed
-                        if ! command -v sonar-scanner &> /dev/null
-                        then
-                            echo "Installing sonar-scanner..."
-                            wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.9.0.43723-linux.zip
-                            unzip sonar-scanner-cli-4.9.0.43723-linux.zip
-                            export PATH=$PWD/sonar-scanner-4.9.0.43723-linux/bin:$PATH
-                        fi
-
-                        sonar-scanner \
+                        docker run --rm \
+                            -e SONAR_TOKEN=$SONAR_TOKEN \
+                            -v $(pwd):/usr/src \
+                            sonarsource/sonar-scanner-cli:latest \
+                            sonar-scanner \
                             -Dsonar.projectKey=hello-python \
                             -Dsonar.projectName=hello-python \
                             -Dsonar.sources=. \
@@ -46,7 +41,11 @@ pipeline {
                 echo 'Deploying to Kubernetes'
                 withCredentials([file(credentialsId: 'kubeconfig-dev', variable: 'KUBECONFIG')]) {
                     sh '''
-                        kubectl --kubeconfig=$KUBECONFIG apply -f deployment.yaml -n dev
+                        # Use kubeconfig file from Jenkins credentials
+                        export KUBECONFIG=$KUBECONFIG
+
+                        # Apply Kubernetes manifests
+                        kubectl apply -f deployment.yaml -n dev
                     '''
                 }
             }
