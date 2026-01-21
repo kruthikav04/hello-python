@@ -1,10 +1,8 @@
 pipeline {
     agent any
 
-    // Environment variables
     environment {
-        SONAR_HOST_URL = "http://10.4.4.69:9000"
-        KUBECONFIG = '/var/jenkins_home/.kube/config'
+        SONAR_HOST_URL = "http://10.4.4.69:9000" // SonarQube server IP
     }
 
     stages {
@@ -19,7 +17,6 @@ pipeline {
         stage('Code Quality - SonarQube') {
             steps {
                 echo 'Running SonarQube Scan'
-
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                     sh '''
                         docker run --rm \
@@ -28,12 +25,12 @@ pipeline {
                             -v /tmp:/tmp \
                             sonarsource/sonar-scanner-cli:latest \
                             sonar-scanner \
-                                -Dsonar.projectKey=hello-python \
-                                -Dsonar.projectName=hello-python \
-                                -Dsonar.sources=. \
-                                -Dsonar.language=py \
-                                -Dsonar.host.url=$SONAR_HOST_URL \
-                                -Dsonar.login=$SONAR_TOKEN
+                            -Dsonar.projectKey=hello-python \
+                            -Dsonar.projectName=hello-python \
+                            -Dsonar.sources=. \
+                            -Dsonar.language=py \
+                            -Dsonar.host.url=$SONAR_HOST_URL \
+                            -Dsonar.login=$SONAR_TOKEN
                     '''
                 }
             }
@@ -50,8 +47,13 @@ pipeline {
             steps {
                 echo 'Deploying to Kubernetes'
                 sh '''
+                    # Prepare kubeconfig inside workspace
+                    mkdir -p .kube
+                    cp /path/to/your/kubeconfig .kube/config
+
+                    # Run kubectl inside Docker container with workspace-mounted kubeconfig
                     docker run --rm \
-                        -v $KUBECONFIG:$KUBECONFIG \
+                        -v $(pwd)/.kube/config:/.kube/config \
                         -v $(pwd):/workspace \
                         -w /workspace \
                         bitnami/kubectl:latest \
@@ -62,8 +64,11 @@ pipeline {
     }
 
     post {
+        always {
+            echo 'Pipeline finished. Check logs for details.'
+        }
         success {
-            echo 'Pipeline completed successfully!'
+            echo 'Pipeline succeeded!'
         }
         failure {
             echo 'Pipeline failed. Please check the logs!'
