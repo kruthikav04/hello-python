@@ -2,14 +2,18 @@ pipeline {
     agent any
 
     environment {
+        # SonarQube reachable IP
+        SONAR_HOST_URL = "http://10.4.4.69:9000"
+
+        # Kubernetes config path
         KUBECONFIG = '/var/jenkins_home/.kube/config'
-        SONAR_HOST_URL = "http://sonarqube:9000"
     }
 
     stages {
 
         stage('Checkout') {
             steps {
+                echo 'Checking out code from Git'
                 git branch: 'prod', url: 'https://github.com/kruthikav04/hello-python.git'
             }
         }
@@ -39,12 +43,14 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
+                echo 'Building Docker image'
                 sh 'docker build -t hello-python:latest .'
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
+                echo 'Deploying to Kubernetes'
                 sh '''
                     docker run --rm \
                         -v $KUBECONFIG:$KUBECONFIG \
@@ -54,6 +60,15 @@ pipeline {
                         kubectl apply -f deployment.yaml -n dev
                 '''
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Please check the logs!'
         }
     }
 }
