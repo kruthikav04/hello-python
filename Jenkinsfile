@@ -6,13 +6,14 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo 'Checking out code from Git'
-                git branch: 'prod', url: 'https://github.com/kruthikav04/hello-python.git'
+                git branch: 'prod', url: 'https://github.com/kruthikav04/hello-python.git', credentialsId: 'vm-ssh'
             }
         }
 
         stage('SonarQube Scan') {
             steps {
                 echo 'Running SonarQube Scan'
+                // Use Jenkins secret token
                 withCredentials([string(credentialsId: 'Sonar-token', variable: 'SONAR_TOKEN')]) {
                     sh '''
                         sonar-scanner \
@@ -35,9 +36,9 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 echo 'Deploying to Kubernetes'
-                withCredentials([file(credentialsId: 'kubeconfig-dev', variable: 'KUBECONFIG')]) {
+                withCredentials([file(credentialsId: 'kubeconfig-dev', variable: 'KUBECONFIG_FILE')]) {
                     sh '''
-                        export KUBECONFIG=$KUBECONFIG
+                        export KUBECONFIG=$KUBECONFIG_FILE
                         kubectl apply -f deployment.yaml -n dev
                     '''
                 }
