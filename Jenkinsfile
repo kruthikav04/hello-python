@@ -2,15 +2,10 @@ pipeline {
     agent any
 
     stages {
+
         stage('Checkout') {
             steps {
                 git 'https://github.com/kruthikav04/hello-python.git'
-            }
-        }
-
-        stage('Code Quality - SonarQube') {
-            steps {
-                echo 'Running SonarQube Scan'
             }
         }
 
@@ -27,4 +22,3 @@ pipeline {
         }
     }
 }
-
