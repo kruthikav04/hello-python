@@ -5,25 +5,23 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git 'https://github.com/kruthikav04/hello-python.git
+                git 'https://github.com/kruthikav04/hello-python.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t hello-python .'
+                sh '''
+                    docker build -t hello-python:latest .
+                '''
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f deployment.yaml'
-            }
-        }
-    }
                 echo 'Deploying to Kubernetes'
                 sh '''
-                    kubectl apply -f deployment.yaml -n dev
+                    kubectl apply -f k8s/deployment.yml -n dev
                 '''
             }
         }
@@ -41,3 +39,4 @@ pipeline {
         }
     }
 }
+
