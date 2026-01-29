@@ -5,40 +5,20 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                echo 'Checking out code from Git'
-                git branch: 'prod', url: 'https://github.com/kruthikav04/hello-python.git', credentialsId: 'vm-ssh'
+                git 'https://github.com/kruthikav04/hello-python.git
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                echo 'Building Docker image'
-                sh 'docker build -t hello-python:latest .'
+                sh 'docker build -t hello-python .'
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                echo 'Deploying to Kubernetes'
-                withCredentials([file(credentialsId: 'kubeconfig-dev', variable: 'KUBECONFIG_FILE')]) {
-                    sh '''
-                        export KUBECONFIG=$KUBECONFIG_FILE
-                        kubectl apply -f deployment.yaml -n dev
-                    '''
-                }
+                sh 'kubectl apply -f deployment.yaml'
             }
-        }
-    }
-
-    post {
-        always {
-            echo 'Pipeline finished. Check logs for details.'
-        }
-        success {
-            echo 'Pipeline succeeded!'
-        }
-        failure {
-            echo 'Pipeline failed. Please check the logs!'
         }
     }
 }
