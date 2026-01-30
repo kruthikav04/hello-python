@@ -5,7 +5,8 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/kruthikav04/hello-python.git'
+                git branch: 'main',
+                    url: 'https://github.com/kruthikav04/hello-python.git'
             }
         }
 
@@ -13,6 +14,14 @@ pipeline {
             steps {
                 sh '''
                     docker build -t hello-python:latest .
+                '''
+            }
+        }
+
+        stage('Create Namespace dev') {
+            steps {
+                sh '''
+                    kubectl get namespace dev || kubectl create namespace dev
                 '''
             }
         }
@@ -32,10 +41,10 @@ pipeline {
             echo 'Pipeline finished.'
         }
         success {
-            echo 'Pipeline succeeded!'
+            echo '✅ Pipeline succeeded!'
         }
         failure {
-            echo 'Pipeline failed. Check logs.'
+            echo '❌ Pipeline failed. Check logs.'
         }
     }
 }
