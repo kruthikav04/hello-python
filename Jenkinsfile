@@ -1,6 +1,16 @@
 pipeline {
     agent any
 
+    // 🔥 REQUIRED for GitHub webhook trigger
+    triggers {
+        githubPush()
+    }
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+    }
+
     stages {
 
         stage('Checkout') {
