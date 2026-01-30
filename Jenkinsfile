@@ -60,7 +60,7 @@ pipeline {
         stage('Terraform Plan') {
             steps {
                 dir('terraform') {
-                    sh 'terraform plan'
+                    sh 'terraform plan -out=tfplan'
                 }
             }
         }
@@ -68,7 +68,7 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 dir('terraform') {
-                    sh 'terraform apply'
+                    sh 'terraform apply -auto-approve tfplan'
                 }
             }
         }
@@ -82,7 +82,7 @@ pipeline {
             echo '✅ Pipeline succeeded! Terraform created dev namespace.'
         }
         failure {
-            echo '❌ Pipeline failed. Check logss.'
+            echo '❌ Pipeline failed. Check logs.'
         }
     }
 }
