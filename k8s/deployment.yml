@@ -14,20 +14,12 @@ spec:
         app: python
     spec:
       containers:
-<<<<<<< HEAD
       - name: python
         image: hello-python:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 6001
 
-=======
-        - name: python
-          image: hello-python:latest
-          imagePullPolicy: Never
-          ports:
-            - containerPort: 6001
->>>>>>> f631359fc95f66a7c697fe990cad7a612845a242
 ---
 apiVersion: v1
 kind: Service
