@@ -82,7 +82,7 @@ pipeline {
             echo '✅ Pipeline succeeded! Terraform created dev namespace.'
         }
         failure {
-            echo '❌ Pipeline failed. Check logs.'
+            echo '❌ Pipeline failed. Check logss.'
         }
     }
 }
