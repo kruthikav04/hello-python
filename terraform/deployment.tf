@@ -3,19 +3,30 @@ resource "kubernetes_deployment_v1" "python_app" {
     name      = "python-app"
     namespace = "dev"
   }
+
   spec {
     replicas = 2
+
     selector {
-      match_labels = { app = "python" }
+      match_labels = {
+        app = "python"
+      }
     }
+
     template {
       metadata {
-        labels = { app = "python" }
+        labels = {
+          app = "python"
+        }
       }
+
       spec {
         container {
           name  = "python"
-          image = "hello-python:latest"
+          # Use Docker Hub image
+          image = "kruthikav04/hello-python:latest"
+          image_pull_policy = "Always"
+
           port {
             container_port = 6001
           }
@@ -23,5 +34,8 @@ resource "kubernetes_deployment_v1" "python_app" {
       }
     }
   }
+
+  # Optional: wait for rollout to complete before Terraform finishes
+  wait_for_rollout = true
 }
 
